@@ -15,86 +15,49 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import net.ausiasmarch.gesportin.entity.NoticiaEntity;
-import net.ausiasmarch.gesportin.service.AleatorioService;
 import net.ausiasmarch.gesportin.service.NoticiaService;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
+@CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600)
 @RestController
-@RequestMapping("/Noticia")
+@RequestMapping("/noticia")
 public class NoticiaApi {
 
     @Autowired
-    AleatorioService oAleatorioService;
+    private NoticiaService oNoticiaService;
 
-    @Autowired
-    NoticiaService oNoticiaService;
-
-    @GetMapping("/aleatorio") // endpoint
-    public ResponseEntity<Integer> aleatorio() {
-        int numeroAleatorio = (int) (Math.random() * 100) + 1;
-        return ResponseEntity.ok(numeroAleatorio);
-    }
-
-    @GetMapping("/aleatorio/{min}/{max}") // endpoint
-    public ResponseEntity<Integer> aleatorioEnRango(
-            @PathVariable int min,
-            @PathVariable int max) {
-        int numeroAleatorio = (int) (Math.random() * (max - min + 1)) + min;
-        return ResponseEntity.ok(numeroAleatorio);
-    }
-
-    @GetMapping("/aleatorio/service/{min}/{max}") // endpoint
-    public ResponseEntity<Integer> aleatorioUsandoServiceEnRango(
-            @PathVariable int min,
-            @PathVariable int max) {
-        return ResponseEntity.ok(oAleatorioService.GenerarNumeroAleatorioEnteroEnRango(min, max));
-    }
-
-    // ---------------------------Rellenar datos fake
-    // Noticia---------------------------------
-
-    @GetMapping("/rellena/{numPosts}")
-    public ResponseEntity<Long> rellenaNoticia(
-            @PathVariable Long numPosts) {
-        return ResponseEntity.ok(oNoticiaService.rellenaNoticia(numPosts));
-    }
-
-    // ----------------------------CRUD---------------------------------
-
-    // obtener post por id
     @GetMapping("/{id}")
     public ResponseEntity<NoticiaEntity> get(@PathVariable Long id) {
         return ResponseEntity.ok(oNoticiaService.get(id));
     }
 
-    // crear posts
-    @PostMapping("")
-    public ResponseEntity<Long> create(@RequestBody NoticiaEntity NoticiaEntity) {
-        return ResponseEntity.ok(oNoticiaService.create(NoticiaEntity));
+    @GetMapping
+    public ResponseEntity<Page<NoticiaEntity>> getPage(Pageable oPageable) {
+        return ResponseEntity.ok(oNoticiaService.getPage(oPageable));
     }
 
-    // modificar posts
-    @PutMapping("")
-    public ResponseEntity<Long> update(@RequestBody NoticiaEntity NoticiaEntity) {
-        return ResponseEntity.ok(oNoticiaService.update(NoticiaEntity));
+    @PostMapping
+    public ResponseEntity<NoticiaEntity> create(@RequestBody NoticiaEntity noticiaEntity) {
+        return ResponseEntity.ok(oNoticiaService.create(noticiaEntity));
     }
 
-    // borrar posts
+    @PutMapping
+    public ResponseEntity<NoticiaEntity> update(@RequestBody NoticiaEntity noticiaEntity) {
+        return ResponseEntity.ok(oNoticiaService.update(noticiaEntity));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Long> delete(@PathVariable Long id) {
         return ResponseEntity.ok(oNoticiaService.delete(id));
     }
- 
-    // vaciar tabla Noticia (solo administradores)
+
+    @PostMapping("/fill/{cantidad}")
+    public ResponseEntity<Long> fill(@PathVariable Long cantidad) {
+        return ResponseEntity.ok(oNoticiaService.fill(cantidad));
+    }
+
     @DeleteMapping("/empty")
     public ResponseEntity<Long> empty() {
         return ResponseEntity.ok(oNoticiaService.empty());
-    }
-
-    // listado paginado de posts
-    @GetMapping("")
-    public ResponseEntity<Page<NoticiaEntity>> getPage(Pageable oPageable) {
-        return ResponseEntity.ok(oNoticiaService.getPage(oPageable));
     }
 
     @GetMapping("/count")
